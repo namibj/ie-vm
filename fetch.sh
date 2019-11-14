@@ -51,15 +51,16 @@ shift $((OPTIND-1))
 if echo "${URL}" | grep -qE '\.zip$'; then
     # Fetch ZIP file
     TMP_DIR="./workdir-$(basename "${URL}" .zip | sed 's/%20/ /')"
-    wget -c -P "$TMP_DIR" "${URL}"
+    curl --retry 99 "${URL}" | funzip | tar -xvC "$TMP_DIR"
 else
     # Fetch each part of zip file
     TMP_DIR="./workdir-$(basename "${URL}" .txt)"
     wget -q -O - "${URL}" | tr -d "\r" | xargs -n1 -P8 wget -c -P "$TMP_DIR"
-fi
 
 # Extract VMDK from archive
 cat "$TMP_DIR"/*.zip* | funzip | tar -xvC "$TMP_DIR"
+
+fi
 VMDK="$(echo "$TMP_DIR"/*.vmdk)"
 [ -e "$VMDK" ] || { echo "No VMDK extracted" 1>&2; exit 1; }
 

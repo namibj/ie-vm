@@ -47,7 +47,8 @@ while getopts ":hepb:m:n" opt; do
     case $opt in
         h)  usage ;;
         e) EFIBOOT="T" ;;
-        p) NIC="pcnet" ;;
+#        p) NIC="pcnet" ;;
+        p) NIC="rtl8139" ;;
         b) QEMUSYS=$OPTARG ;;
         m) RAM=$OPTARG ;;
         n) NIC="pcnet" ; VGA="std" ;;
@@ -94,8 +95,8 @@ $QEMUSYS -enable-kvm \
     -cpu host \
     -drive "file=$IMG" \
     ${EXTRA_ARGS} \
-    -net nic,model=$NIC \
-    -net user \
+    -netdev user,id=guesttohost,restrict=on,smb=/var/local/vm/shared \
+    -device $NIC,netdev=guesttohost \
     -m "$RAM" \
     -usb -device usb-ehci,id=ehci \
     -device usb-tablet \
